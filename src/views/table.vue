@@ -1,6 +1,6 @@
 <template>
   <div id="Table">
-    11
+    <div class="main">11</div>
   </div>
 </template>
 
@@ -10,4 +10,6 @@ export default {}
 
 <style lang="stylus">
 @import '~@/styles/index.styl'
+.main
+  font-size 15px
 </style>
