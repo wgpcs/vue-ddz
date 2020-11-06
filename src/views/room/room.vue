@@ -4,8 +4,8 @@
       <div class="table wui-flex wui-col" v-for="(table, key) in tables" :key="key">
         <div class="title">{{ key }} 号桌子</div>
         <div class="table-seat wui-flex ">
-          <div class="seat" @click="goTable($event, index, key)" v-for="(seat, index) in table" :key="seat">
-            {{ index }}号
+          <div class="seat" @click="goTable($event, index, key, seat)" v-for="(seat, index) in table" :key="index">
+            {{ index }}号位置
           </div>
         </div>
       </div>
@@ -25,21 +25,22 @@ export default {
   created() {
     let ws = this.$store.getters.socket
     console.log('--> ' + ws)
-    if (!!ws) {
-      this.sendMsg(ws)
-      ws.onmessage = res => {
-        let data = JSON.parse(res.data)
-        console.log(data.data)
-        // data.data && this.setPoker(data.pokers)
-      }
-    }
+    // if (!!ws) {
+    //   this.sendMsg(ws)
+    //   ws.onmessage = res => {
+    //     let data = JSON.parse(res.data)
+    //     console.log(data.data)
+    //     // data.data && this.setPoker(data.pokers)
+    //   }
+    // }
   },
   watch: {
     WS: function(ws) {
       if (!!ws) {
+        this.sendMsg(ws)
         ws.onmessage = res => {
           let data = JSON.parse(res.data)
-          console.log(data.data)
+          console.log(data)
           data.data && (this.tables = data.data)
         }
       }
@@ -52,7 +53,12 @@ export default {
   },
   methods: {
     // 进入房间
-    goTable(e, uid, tid) {
+    goTable(e, uid, tid, seat) {
+      console.log(seat)
+      if (seat) {
+        console.log('该位置已经有他人呢')
+        return
+      }
       this.$router.push({
         path: '/table',
         name: 'Table',

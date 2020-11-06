@@ -65,7 +65,7 @@ export default {
 <style lang="css">
 .joker {
   position: absolute;
-  width: 10px;
+  width: 24px;
   padding: 2px 5px;
   line-height: 25px;
   font-size: 24px;
