@@ -17,8 +17,10 @@
 
 <script>
 import card from './card'
+import { pokerMix } from '../common/mixins/poker'
 export default {
   name: 'Cards',
+  mixins: [pokerMix],
   props: {
     pokers: {
       type: Array,
@@ -41,31 +43,6 @@ export default {
   data() {
     return {
       cards: [],
-      cardLabel: {
-        '3': '3',
-        '4': '4',
-        '5': '5',
-        '6': '6',
-        '7': '7',
-        '8': '8',
-        '9': '9',
-        '10': '10',
-        '11': 'J',
-        '12': 'Q',
-        '13': 'K',
-        '14': 'A',
-        '15': '2',
-        '10000': 'JOKER',
-        '10001': 'JOKER'
-      },
-      types: {
-        '0': 'fk',
-        '1': 'mh',
-        '2': 'hx',
-        '3': 'ht',
-        '10000': 'LittleJoker',
-        '10001': 'BigJoker'
-      },
       joker: false,
       first: false,
       moveChange: false,
@@ -105,18 +82,13 @@ export default {
     },
     _addCard(index, cards) {
       if (cards[index] && cards[index].value) {
-        let cardLabel = this.cardLabel
-        this.cards.push({
-          label: cardLabel[cards[index].value],
-          type: this.types[cards[index].type],
-          v: cards[index].value,
-          k: cards[index].type,
-          checked: false
-        })
+        this.transformPok(this.cards, cards[index])
       } else {
         clearInterval(this.timeId)
+        this.sortPokers(this.cards)
       }
     },
+
     // 出牌
     push() {
       if (this.cards.filter(c => c.checked).length < 1) {
@@ -134,6 +106,10 @@ export default {
       this.$emit('push', { pokers: pokers, checked: checked })
       // this.pushCard(pokers, checked, history)
     },
+    /**
+     * 加入历史出牌
+     * 移除已出的牌
+     */
     pushCard(pokers, checked, history) {
       history.push(...checked)
       history.forEach(h => {

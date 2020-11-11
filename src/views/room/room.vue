@@ -24,7 +24,7 @@ export default {
   },
   created() {
     let ws = this.$store.getters.socket
-    console.log('--> ' + ws)
+    // console.log('--> ' + ws)
     // if (!!ws) {
     //   this.sendMsg(ws)
     //   ws.onmessage = res => {
@@ -40,7 +40,7 @@ export default {
         this.sendMsg(ws)
         ws.onmessage = res => {
           let data = JSON.parse(res.data)
-          console.log(data)
+          // console.log(data)
           data.data && (this.tables = data.data)
         }
       }
@@ -70,7 +70,7 @@ export default {
     },
     sendMsg(ws) {
       let tables = `{"type":2,"sub_type":1,"chat":"","player_current":0,"player_turn":0,"pokers":null}`
-      console.log('准备')
+      // console.log('准备')
       ws.send(tables)
     }
   }
