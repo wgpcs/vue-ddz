@@ -16,11 +16,14 @@
 </template>
 
 <script>
+import User from '../modules/user'
 import card from './card'
 import { pokerMix } from '../common/mixins/poker'
+import { commonMix } from '../common/mixins/common'
+var userInstance = new User()
 export default {
   name: 'Cards',
-  mixins: [pokerMix],
+  mixins: [pokerMix, commonMix],
   props: {
     pokers: {
       type: Array,
@@ -36,8 +39,16 @@ export default {
     }
   },
   watch: {
-    pokers(val) {
-      this._initCard(val)
+    // pokers(val) {
+    //   this._initCard(val)
+    // },
+    'sPoker.poker': {
+      deep: true,
+      handler: function(newV, oldV) {
+        // console.log(newV)
+        let cards = JSON.parse(JSON.stringify(newV.cards))
+        this._initCard(cards)
+      }
     }
   },
   data() {
@@ -46,7 +57,8 @@ export default {
       joker: false,
       first: false,
       moveChange: false,
-      timeId: null
+      timeId: null,
+      sPoker: userInstance
     }
   },
   components: {
@@ -72,20 +84,23 @@ export default {
     },
     // 发牌
     _initCard(cards) {
+      // console.log(cards)
       clearInterval(this.timeId)
       let _this = this,
         index = 0
+      this.soundEff(11)
       this.timeId = setInterval(function() {
         _this._addCard(index, cards)
         index++
-      }, 50)
+      }, 210)
     },
     _addCard(index, cards) {
-      if (cards[index] && cards[index].value) {
-        this.transformPok(this.cards, cards[index])
+      console.log(cards[index])
+      if (cards[index] && cards[index].v) {
+        this.cards.push(cards[index])
       } else {
         clearInterval(this.timeId)
-        this.sortPokers(this.cards)
+        // console.log(this.cards)
       }
     },
 

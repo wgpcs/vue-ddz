@@ -1,10 +1,21 @@
 /**
  * description 用户
  */
-
+// import SinglePoker from './card'
+// var singlePoker = new SinglePoker()
 class Player {
-  constructor(id, name) {
-    ;(this.uid = id), (this.name = name), (this.chat = ''), (this.sitID = ''), (this.pokers = []), (this.history = [])
+  constructor(id, name, singlePoker) {
+    // if (!Player.instance) {
+    this.uid = id
+    this.name = name
+    this.say = ''
+    this.sitID = ''
+    this.poker = singlePoker
+    this.cardsNum = ''
+    this.history = []
+    //   Player.instance = this
+    // }
+    // return Player.instance
   }
   sitdown(id) {
     this.sitID = id
@@ -23,10 +34,14 @@ class Player {
     this.history = []
   }
   speak(msg) {
-    this.chat = msg
+    this.say = msg
   }
   shutUp() {
-    this.chat = ''
+    this.say = ''
   }
-  drawCards() {}
+  drawCards(singlePoker) {
+    this.poker = singlePoker
+  }
 }
+
+export default Player

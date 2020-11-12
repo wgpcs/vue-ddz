@@ -1,7 +1,7 @@
 /**
  * description 扑克
  */
-const CardLabel =  {
+const CardLabel = {
   '3': '3',
   '4': '4',
   '5': '5',
@@ -26,15 +26,20 @@ const Types = {
   '10000': 'LittleJoker',
   '10001': 'BigJoker'
 }
-class Poker {
+class SinglePoker {
   constructor() {
+    // if (!SinglePoker.instance) {
     this.cards = []
+    //   SinglePoker.instance = this
+    // }
+    // return SinglePoker.instance
   }
   /**
    * 洗牌
    * @param {array} cards 原始牌数据
    */
   shuffle(cards = null) {
+    this.cards = []
     if (!cards || cards.length == 0) return
     cards.forEach((item, index) => {
       this.cards.push({
@@ -46,4 +51,12 @@ class Poker {
       })
     })
   }
+  // 排序
+  sortPokers() {
+    this.cards.sort((a, b) => {
+      return b.v - a.v
+    })
+  }
 }
+
+export default SinglePoker
