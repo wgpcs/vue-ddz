@@ -28,17 +28,13 @@ const Types = {
 }
 class SinglePoker {
   constructor() {
-    // if (!SinglePoker.instance) {
     this.cards = []
-    //   SinglePoker.instance = this
-    // }
-    // return SinglePoker.instance
   }
   /**
-   * 洗牌
+   * 格式化牌数组
    * @param {array} cards 原始牌数据
    */
-  shuffle(cards = null) {
+  init(cards = null) {
     this.cards = []
     if (!cards || cards.length == 0) return
     cards.forEach((item, index) => {
@@ -51,7 +47,9 @@ class SinglePoker {
       })
     })
   }
-  // 排序
+  /**
+   * 排序
+   */
   sortPokers() {
     this.cards.sort((a, b) => {
       return b.v - a.v

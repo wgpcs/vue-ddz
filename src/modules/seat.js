@@ -12,7 +12,14 @@ class Seat {
     // }
     // return Player.instance
   }
-  sitdown(player) {
+  /**
+   * 座位编号
+   * @param {int} id
+   */
+  sign(id) {
+    this.sitID = id
+  }
+  fillSit(player) {
     this.player = player
   }
   leav() {

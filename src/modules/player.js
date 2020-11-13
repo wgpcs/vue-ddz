@@ -1,8 +1,6 @@
 /**
  * description 用户
  */
-// import SinglePoker from './card'
-// var singlePoker = new SinglePoker()
 class Player {
   constructor(id, name, singlePoker) {
     // if (!Player.instance) {
@@ -11,15 +9,22 @@ class Player {
     this.say = ''
     this.sitID = ''
     this.poker = singlePoker
-    this.cardsNum = ''
+    this.cardsNum = 0
     this.history = []
     //   Player.instance = this
     // }
     // return Player.instance
   }
-  sitdown(id) {
-    this.sitID = id
+  /**
+   * 就坐
+   * @param {int} sid
+   */
+  sitdown(sid) {
+    this.sitID = sid
   }
+  /**
+   * 离开座位
+   */
   leav() {
     this.sitID = ''
   }
@@ -30,15 +35,29 @@ class Player {
   pushCard(pokers) {
     this.history = pokers
   }
+  /**
+   * 清除桌面
+   */
   clearHistory() {
     this.history = []
   }
+  /**
+   * 发言
+   * @param {string} msg
+   */
   speak(msg) {
     this.say = msg
   }
+  /**
+   * 清空发言
+   */
   shutUp() {
     this.say = ''
   }
+  /**
+   * 抓牌
+   * @param {object} singlePoker
+   */
   drawCards(singlePoker) {
     this.poker = singlePoker
   }

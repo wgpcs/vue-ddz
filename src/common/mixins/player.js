@@ -7,7 +7,7 @@ export const seatMix = {
       playersNum: 4,
       historyCards: [],
       // 0-左，1-右，2-上
-      seats: [new Player(), new Player(), new Player()]
+      seats: [new Seat(), new Seat(), new Seat()]
     }
   },
   created() {
@@ -20,14 +20,27 @@ export const seatMix = {
      * @param {*int} id 当前用户的座位号
      */
     identifySeat(id = 0) {
+      let P = new Player(id)
+      P.sitdown(id)
+      console.log(P)
+
+      let i = this.seats.findIndex(v => v.sitID == id)
+      if (i !== -1) {
+        this.seats[i].fillSit(P)
+      }
+    },
+    /**
+     * 座位编号
+     */
+    signNumber(id = 0) {
       let sid = parseInt(id)
       let maxNum = this.playersNum - 1
       let lsit = sid - 1 < this.startNum ? maxNum : sid - 1
       let rsit = sid + 1 > maxNum ? this.startNum : sid + 1
       let tsit = sid + 2 > maxNum ? sid - 2 : sid + 2
-      this.seats[0].sitdown(lsit)
-      this.seats[1].sitdown(rsit)
-      this.seats[2].sitdown(tsit)
+      this.seats[0].sign(lsit)
+      this.seats[1].sign(rsit)
+      this.seats[2].sign(tsit)
       console.log(this.seats)
     },
     /**
@@ -41,11 +54,12 @@ export const seatMix = {
       // console.log(pid)
       // console.log(i, this.seats[i])
       if (i !== -1) {
+        let player = this.seats[i].player
         if (pokers.length > 0) {
-          this.seats[i].pushCard(pokers)
+          player.pushCard(pokers)
         } else {
-          this.seats[i].speak('不要')
-          this.seats[i].clearHistory()
+          player.speak('不要')
+          player.clearHistory()
         }
       }
     },
@@ -58,8 +72,8 @@ export const seatMix = {
         return
       }
       this.seats.forEach(item => {
-        item.clearHistory()
-        item.shutUp()
+        item.player.clearHistory()
+        item.player.shutUp()
       })
     }
   }

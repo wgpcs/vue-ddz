@@ -1,6 +1,12 @@
+import SinglePoker from '../../modules/card'
+import SoundEffect from '../../modules/soundEffect'
+let singlePoker = new SinglePoker()
+let soundEff = new SoundEffect()
 export const msgMix = {
   data() {
-    return {}
+    return {
+      startStatus: false
+    }
   },
   methods: {
     onWSMsg() {
@@ -34,6 +40,8 @@ export const msgMix = {
 
         // 出牌
         if (data.pokers && data.sub_type == '4') {
+          this.initCountdownTime() // 初始化计时器时间
+          this.timingBegin()
           this.submitCards(data)
         }
       }
@@ -43,6 +51,7 @@ export const msgMix = {
      */
     clearhis(data) {
       if (this.seatIndex == data.player_current) this.clearHistory(this.seatIndex)
+      // 新一轮出牌
       if (data.new_circle) {
         this.clearHistory()
         this.newcircle = true
@@ -55,14 +64,17 @@ export const msgMix = {
      * 胜利
      */
     winner(data) {
+      this.startStatus = false
       this.msg = `${data.player_current}号玩家获胜`
       console.log(data.player_current, this.seatIndex)
       if (data.player_current == this.seatIndex) {
         this.submitCards(data)
-        this.soundEff(10)
+        // this.soundEff(10)
+        soundEff.setSence('winner').play()
         this.smsg = '恭喜！！你赢了'
       } else {
-        this.soundEff(9)
+        // this.soundEff(9)
+        soundEff.setSence('lose').play()
         this.smsg = '失败'
       }
       this.ready = false
@@ -72,15 +84,7 @@ export const msgMix = {
      */
     sitdown(data) {
       this.msg = data.player_current + '牌友上桌了'
-      let i = this.seats.findIndex(v => v.sitID == data.player_current)
-      if (i !== -1) {
-        if (pokers.length > 0) {
-          this.seats[i].pushCard(pokers)
-        } else {
-          this.seats[i].speak('不要')
-          this.seats[i].clearHistory()
-        }
-      }
+      this.identifySeat(data.player_current)
     },
     /**
      * 准备
@@ -93,6 +97,7 @@ export const msgMix = {
      * 发牌
      */
     shuffleCards(data) {
+      this.startStatus = true
       this.myPokers = data.pokers
       this.wSt()
     },
@@ -102,31 +107,30 @@ export const msgMix = {
     submitCards(data) {
       let pushplayer = data.player_current
       let pushPoker = data.pokers
+      singlePoker.init(pushPoker)
+
       // console.log(pushplayer, pushPoker, this.seatIndex)
       this.msg = ''
-      if (pokers.length >= 4 && pokers.every(el => el.label === pokers[0].label)) {
-        this.soundEff(2)
-      }
-      if (pokers.kength == 2 && pokers[0].label == 'JOKER') {
-        this.soundEff(1)
-      }
-      if (pokers.kength == 1 && pokers[0].v == '10001') {
-        this.soundEff(12)
-      }
+      // let pokers = []
+      // this.eachPokAndFormat(pokers, pushPoker)
+      this.chooseSence(singlePoker.cards)
       // 自己出牌成功
-      if (pushPoker && pushplayer == this.seatIndex) {
-        this.compPush()
+      if (singlePoker.cards && pushplayer == this.seatIndex) {
+        if (singlePoker.cards.length > 0) {
+          this.compPush()
+        } else{
+          
+        }
+        
       } else {
-        if (pushPoker.length > 0) {
-          let pokers = []
-          this.eachPokAndFormat(pokers, pushPoker)
+        if (singlePoker.cards.length > 0) {
           // console.log(pokers)
-          this.msg = `${pushplayer}号位置 出牌${pokers[0].label}`
-
-          this.identifyPoker(pushplayer, pokers)
+          this.msg = `${pushplayer}号位置 出牌${singlePoker.cards[0].label}`
+          this.identifyPoker(pushplayer, singlePoker.cards)
         } else {
           this.msg = `${pushplayer}号位置 要不起`
-          this.soundEff(4)
+          // this.soundEff(4)
+          soundEff.setScene('noout').play()
           this.identifyPoker(pushplayer)
           // setTimeout(() => {
           //   this.seseatsat[pushplayer].speak()
@@ -135,34 +139,24 @@ export const msgMix = {
       }
     },
     /**
-     * 音效
-     * @param {int} type
+     * 判断音效
+     * @param {array} pokers 玩家打出得牌
      */
-    soundEff(type = 0) {
-      let mp3u = ''
-      switch (type) {
-        case 1:
-          mp3u = require('../../assets/music/wz.mp3')
-          break
-        case 2:
-          mp3u = require('../../assets/music/zd.mp3')
-          break
-        case 3:
-          mp3u = require('../../assets/music/sz.mp3')
-          break
-        case 9:
-          mp3u = require('../../assets/music/lose.wav')
-          break
-        case 11:
-          mp3u = require('../../assets/music/fp.mp3')
-          break
-        default:
-          mp3u = require('../../assets/music/cp.mp3')
-          break
+    chooseSence(pokers) {
+      console.log(pokers)
+      if (pokers.length < 0) return
+      if (pokers.length >= 4 && pokers.every(el => el.label === pokers[0].label)) {
+        // this.soundEff(2)
+        soundEff.setScene('boom').play()
       }
-      var mp3 = new Audio(mp3u)
-      // console.log(mp3)
-      mp3.play()
+      if (pokers.length == 2 && pokers[0].label == 'JOKER') {
+        // this.soundEff(1)
+        soundEff.setScene('kingboom').play()
+      }
+      if (pokers.length == 1 && pokers[0].v == '10001') {
+        // this.soundEff(12)
+        soundEff.setScene('bigking').play()
+      }
     },
     reset() {
       this.smsg = ''

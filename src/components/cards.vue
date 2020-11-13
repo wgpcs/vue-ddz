@@ -17,13 +17,14 @@
 
 <script>
 import User from '../modules/user'
+import SoundEffect from '../modules/soundEffect'
 import card from './card'
-import { pokerMix } from '../common/mixins/poker'
 import { commonMix } from '../common/mixins/common'
+let soundEff = new SoundEffect()
 var userInstance = new User()
 export default {
   name: 'Cards',
-  mixins: [pokerMix, commonMix],
+  mixins: [commonMix],
   props: {
     pokers: {
       type: Array,
@@ -88,7 +89,9 @@ export default {
       clearInterval(this.timeId)
       let _this = this,
         index = 0
-      this.soundEff(11)
+      // this.soundEff(11)
+
+      soundEff.setScene('ready').play()
       this.timeId = setInterval(function() {
         _this._addCard(index, cards)
         index++
@@ -101,11 +104,15 @@ export default {
       } else {
         clearInterval(this.timeId)
         // console.log(this.cards)
+        this.initCountdownTime() // 初始化计时器时间
       }
     },
 
     // 出牌
-    push() {
+    push(ai = null) {
+      if (ai == true) {
+        this.cards[this.cards.length - 1].checked = true
+      }
       if (this.cards.filter(c => c.checked).length < 1) {
         alert('请选择需要出的牌！')
         return
@@ -133,7 +140,7 @@ export default {
           1
         )
       })
-      this.$emit('pushCard', { pokers: pokers, history: history })
+      this.$emit('pushCard', { pokers: pokers, history: history, left: this.cards.length })
     },
     unpush() {
       this.cards.forEach(item => {

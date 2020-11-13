@@ -11,6 +11,7 @@
         <div class="prepare" v-if="ready && !myPokers">等待其他玩家准备!</div>
         <div class="msg">{{ smsg }}</div>
         <div class="msg prepare">{{ msg }}</div>
+        <div class="msg prepare">{{ countdown }}</div>
       </div>
     </div>
     <div class="animation" v-show="showAni">
@@ -26,16 +27,16 @@
           <div class="cards other wui-flex wui-col seat-place wui-align-center">
             <div class="seat">
               <!-- <label class="uname" style="text-align: center; margin: 50px">t-{{ seats[2].sitid }}</label> -->
-              <div class="seat-style">
+              <div class="seat-style" v-if="seats[2].player">
                 <img class="img" src="../assets/pm.png" />
               </div>
             </div>
 
             <div class="cards history wui-flex wui-col wui-flex-item ">
-              <div class="wui-flex other-small wui-justify-center">
+              <div class="wui-flex other-small wui-justify-center" v-if="seats[2].player">
                 <card
                   class="card small"
-                  v-for="(item, i) in seats[2].history"
+                  v-for="(item, i) in seats[2].player.history"
                   :value="item.label"
                   :key="i"
                   :type="item.type"
@@ -43,7 +44,7 @@
               </div>
             </div>
             {{ seats[2].sitID }}
-            <div class="say wui-flex wui-align-center">{{ seats[2].say }}</div>
+            <div class="say wui-flex wui-align-center" v-if="seats[2].player">{{ seats[2].player.say }}</div>
           </div>
         </div>
         <div class="main-top wui-flex wui-justify-between wui-align-center wui-flex-item">
@@ -52,14 +53,14 @@
               <!-- <label class="uname">l-{{ seats[0].sitid }}</label> -->
               <div class="seat">
                 <div class="seat-style">
-                  <img class="img" src="../assets/pm.png" />
+                  <img class="img" src="../assets/pm.png" v-if="seats[0].player" />
                 </div>
               </div>
               <div class="cards history wui-flex wui-col wui-flex-item ">
-                <div class="wui-flex other-small wui-justify-center">
+                <div class="wui-flex other-small wui-justify-center" v-if="seats[0].player">
                   <card
                     class="card small"
-                    v-for="(item, i) in seats[0].history"
+                    v-for="(item, i) in seats[0].player.history"
                     :value="item.label"
                     :key="i"
                     :type="item.type"
@@ -67,20 +68,20 @@
                 </div>
               </div>
               {{ seats[0].sitID }}
-              <div class="say wui-flex wui-align-center">{{ seats[0].say }}</div>
+              <div class="say wui-flex wui-align-center" v-if="seats[0].player">{{ seats[0].player.say }}</div>
               <div class="clear"></div>
             </div>
           </div>
           <div class="table-right">
             <div class="cards other cards-margin-right wui-flex">
-              <div class="say wui-flex wui-align-center">{{ seats[1].say }}</div>
+              <div class="say wui-flex wui-align-center" v-if="seats[1].player">{{ seats[1].player.say }}</div>
               {{ seats[1].sitID }}
               <!-- 已出牌区域 -->
               <div class="cards history wui-flex wui-col wui-flex-item ">
-                <div class="wui-flex other-small wui-justify-center">
+                <div class="wui-flex other-small wui-justify-center" v-if="seats[1].player">
                   <card
                     class="card small"
-                    v-for="(item, i) in seats[1].history"
+                    v-for="(item, i) in seats[1].player.history"
                     :value="item.label"
                     :key="i"
                     :type="item.type"
@@ -92,7 +93,7 @@
               <div class="seat">
                 <!-- <label class="uname" style="text-align: center; margin: 50px">t-{{ seats[2].sitid }}</label> -->
                 <div class="seat-style">
-                  <img class="img" src="../assets/pm.png" />
+                  <img class="img" src="../assets/pm.png" v-if="seats[1].player" />
                 </div>
               </div>
               <div class="clear"></div>
@@ -101,6 +102,9 @@
         </div>
 
         <div class="main-bottom wui-flex-item wui-flex wui-col">
+          <div class="say wui-flex wui-align-center" v-if="!historyCards || historyCards.length == 0">
+            {{ Mine.say }}
+          </div>
           <!-- 已出牌区域 -->
           <div class="cards history wui-flex wui-col wui-flex-item ">
             <div class="wui-flex other-small wui-justify-center">
@@ -122,7 +126,7 @@
               </div>
             </div>
           </div>
-          <Cards ref="c_cards" @push="push" @pushCard="pushCard"></Cards>
+          <Cards class="cards-height" ref="c_cards" @push="push" @pushCard="pushCard"></Cards>
           <!-- <div class="cards cards-height wui-flex wui-justify-center">
             <card
               class="card big"
@@ -150,14 +154,14 @@ import User from '../modules/user'
 import SinglePoker from '../modules/card'
 import { seatMix } from '../common/mixins/player'
 import { msgMix } from '../common/mixins/message'
-import { pokerMix } from '../common/mixins/poker'
 import { commonMix } from '../common/mixins/common'
 import { mapActions, mapGetters } from 'vuex'
-
+import SoundEffect from '../modules/soundEffect'
+let soundEff = new SoundEffect()
 var singlePoker = new SinglePoker()
 export default {
   name: 'Table',
-  mixins: [seatMix, pokerMix, msgMix, commonMix],
+  mixins: [seatMix, msgMix, commonMix],
   data() {
     return {
       showAni: false,
@@ -166,7 +170,6 @@ export default {
       roomIndex: '',
       seatIndex: '',
       first: false,
-      cards: [],
       myPokers: null,
       ready: false,
       currentPlayer: -1,
@@ -189,8 +192,9 @@ export default {
     this.seatIndex = uid
     this.tableIndex = tid
     // 确认位置
-    this.identifySeat(uid)
+    this.signNumber(uid)
     this.user = new User(uid)
+    this.setUser(this.user)
 
     console.log('准备')
     this.seatDown()
@@ -200,10 +204,18 @@ export default {
   },
   computed: {
     ...mapGetters({
-      gPokers: 'pokers',
-      WS: 'socket'
+      WS: 'socket',
+      Mine: 'user'
     })
   },
+  // watch: {
+  //   countdown(val) {
+  //     console.log(val)
+  //     if (val > 0) {
+  //       this.timingBegin()
+  //     }
+  //   }
+  // },
   mounted() {
     window.addEventListener('beforeunload', e => {
       this.WS.over()
@@ -212,28 +224,31 @@ export default {
   },
   methods: {
     ...mapActions({
-      setPoker: 'ipoker/togglePokers'
+      // setPoker: 'ipoker/togglePokers',
+      setUser: 'user/toggleUser'
     }),
-    // 就做
+    /**
+     * 就坐
+     */
     seatDown() {
       let sit = `{"type":2,"sub_type":0,"chat":"","player_current":${this.seatIndex},"player_turn":0,"pokers":null,"table_index":${this.tableIndex},"table_position_index":${this.seatIndex}}`
-      // let ready = `{"type":2,"sub_type":1,"chat":"","player_current":${uid},"player_turn":0,"pokers":null,"table_index":${tid},"table_position_index":${uid}}`
       this.WS.send(sit)
-      // this.WS.send(ready)
     },
     // 出牌
-    pushCheck() {
+    pushCheck(ai = null) {
       if (this.currentPlayer !== this.seatIndex) {
         this.msg = '还不是你出牌'
         return
       }
-      this.$refs.c_cards.push()
+      this.$refs.c_cards.push(ai)
     },
     compPush() {
       console.log('compPush---------')
       console.log(this.pushObj)
       if (this.pushObj && this.pushObj.pokers) {
-        this.soundEff()
+        this.Mine.speak('')
+        // this.soundEff()
+        soundEff.setScene('push').play()
         this.$refs.c_cards.pushCard(this.pushObj.pokers, this.pushObj.checked, this.historyCards)
       }
     },
@@ -243,17 +258,25 @@ export default {
       // console.log(str)
       this.pushObj = obj
       this.WS.send(str)
-      // this.$refs.c_cards.push(obj.pokers, obj.checked, this.historyCards)
     },
     pushCard(obj) {
       // console.log(obj)
+      // let say = `{"type":1,"sub_type":0,"chat":"我就剩 "${obj.left} "张了！"}`
+      // this.WS.send(say)
       this.historyCards = obj.history
     },
+    /**
+     * 不出，要不起
+     */
     unpush() {
+      this.Mine.speak('不要')
       this.$refs.c_cards.unpush()
       this.pushObj = null
       this.WS.send('{"type":2,"sub_type":4,"pokers":[]}')
     },
+    /**
+     * 准备就绪
+     */
     readyToPlay() {
       console.log('准备')
       let ready = `{"type":2,"sub_type":1,"chat":"","player_current":${this.seatIndex},"player_turn":0,"pokers":null,"table_index":${this.tableIndex},"table_position_index":${this.seatIndex}}`
@@ -261,7 +284,7 @@ export default {
       this.ready = true
     },
     wSt() {
-      singlePoker.shuffle(this.myPokers)
+      singlePoker.init(this.myPokers)
       singlePoker.sortPokers()
       this.user.drawCards(singlePoker)
       // this.cards = this.myPokers
@@ -274,10 +297,12 @@ export default {
 <style lang="stylus">
 @import '~@/styles/index.styl'
 $seatWidth = 200px
-$tableHeight = 1200px
+$tableHeight = 1400px
+$tableWidth = 800px
 $mainPadd = 200px
 #Table
-  height $tableHeight
+  height 100%
+  min-height $tableHeight
   position relative
 .animation
   position fixed
@@ -335,6 +360,7 @@ $mainPadd = 200px
   .main-top
     min-height 500px
   .main-bottom
+    padding-bottom 100px
     height 200px
     .btn-container
       margin 0 auto
@@ -342,6 +368,8 @@ $mainPadd = 200px
     .main-bottom-btns
       margin-bottom 40px
       width 100%
+  .cards-height
+    height 120px
 .table
   position relative
   height 100%
