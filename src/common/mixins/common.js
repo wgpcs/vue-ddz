@@ -67,6 +67,19 @@ export const commonMix = {
       }
       this.countdown--
       this.iCount = setTimeout(this.timingBegin, 1000)
+    },
+    addMsg(msg) {
+      let data = {
+        type: 1,
+        msg: '这是系统消息' + msg,
+        color: 'red',
+        time: Date.now()
+      }
+      this.chatArr.push(data)
+      let MC = this.$refs.MsgCont
+      setTimeout(() => {
+        MC.scrollTop = MC.scrollHeight
+      }, 10)
     }
   }
 }

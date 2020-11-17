@@ -21,6 +21,10 @@ export const msgMix = {
         } else {
           this.smsg = ''
         }
+        // 用户准备
+        if (data.sub_type == '1') {
+          this.readyOne(data)
+        }
         // 胜利
         if (data.sub_type == '7') {
           this.winner(data)
@@ -29,7 +33,7 @@ export const msgMix = {
         if (data.sub_type == '0') {
           this.sitdown(data)
         }
-        // 准备
+        // 都已准备
         if (data.sub_type == '6') {
           this.readyPlay(data)
         }
@@ -45,6 +49,12 @@ export const msgMix = {
           this.submitCards(data)
         }
       }
+    },
+    /**
+     * 用户单击准备
+     */
+    readyOne(data) {
+      this.addMsg(data.player_current + '准备好了')
     },
     /**
      * 出牌历史
@@ -83,7 +93,8 @@ export const msgMix = {
      * 就位
      */
     sitdown(data) {
-      this.msg = data.player_current + '牌友上桌了'
+      // this.msg = data.player_current + '牌友上桌了'
+      this.addMsg(data.player_current + '牌友上桌了')
       this.identifySeat(data.player_current)
     },
     /**
@@ -118,10 +129,8 @@ export const msgMix = {
       if (singlePoker.cards && pushplayer == this.seatIndex) {
         if (singlePoker.cards.length > 0) {
           this.compPush()
-        } else{
-          
+        } else {
         }
-        
       } else {
         if (singlePoker.cards.length > 0) {
           // console.log(pokers)

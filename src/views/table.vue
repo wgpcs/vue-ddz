@@ -12,6 +12,14 @@
         <div class="msg">{{ smsg }}</div>
         <div class="msg prepare">{{ msg }}</div>
         <div class="msg prepare">{{ countdown }}</div>
+        <div class="msgCont">
+          <div class="content" ref="MsgCont">
+            <h3>{{ tableIndex }} 号桌子 欢迎 您来！</h3>
+            <div class="chat">
+              <p v-for="(item, i) in chatArr" :key="i">{{ item.msg }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="animation" v-show="showAni">
@@ -178,7 +186,8 @@ export default {
       msg: '',
       smsg: '',
       user: {},
-      newcircle: true
+      newcircle: true,
+      chatArr: []
     }
   },
   components: {
@@ -300,6 +309,7 @@ $seatWidth = 200px
 $tableHeight = 1400px
 $tableWidth = 800px
 $mainPadd = 200px
+$msgMaxHeight = 200px
 #Table
   height 100%
   min-height $tableHeight
@@ -326,6 +336,18 @@ $mainPadd = 200px
   color #fff
   font-size 45px
   text-shadow:4px 4px 0px #000
+.msgCont
+  position absolute
+  padding 20px
+  top 0
+  right 0
+  .content
+    padding 20px
+    font-size 18px
+    line-height 34px
+    max-height $msgMaxHeight
+    overflow auto
+    background rgba(0, 0, 0, 0.5)
 .ready-btn
   width 156px
   height 80px
